@@ -1,15 +1,17 @@
 package pl.lech.data;
 
 public class TimedEntity {
-    private int createWeek;
-    private int weeksToFinish;
+    protected int weeksToFinish;
 
-    public TimedEntity(int currentWeek, int weeksToFinish) {
-        this.createWeek = currentWeek;
+    public TimedEntity(int weeksToFinish) {
         this.weeksToFinish = weeksToFinish;
     }
 
-    protected boolean isReady(int week){
-        return week >= createWeek + weeksToFinish;
+    public void tick(){
+        this.weeksToFinish--;
+    }
+
+    protected boolean isReady(){
+        return weeksToFinish <= 0;
     }
 }

@@ -10,8 +10,8 @@ import java.util.*;
 public class FarmGame {
     private static final int START_FARMS = 5;
 
-    private final int money = 2000;
-    private final int week = 1;
+    private int money = 500_000;
+    private int week = 1;
     private boolean endGame = false;
     private final Calendar currentDate = new GregorianCalendar();
     private final List<Farm> farms = new ArrayList<>();
@@ -61,6 +61,7 @@ public class FarmGame {
 
     private void startGame() {
         Scanner scanner = new Scanner(System.in);
+        Random random = new Random(System.currentTimeMillis());
         while (!this.endGame) {
             System.out.println("Data: rok: " + this.currentDate.get(Calendar.YEAR) + ", tydzień: " + this.currentDate.get(Calendar.WEEK_OF_YEAR));
             for (int i = 0; i < MenuEntries.values().length; i++) {
@@ -105,17 +106,45 @@ public class FarmGame {
                     System.out.println("Niepoprawny wybór!");
                     continue;
             }
-            //rośliny rosną, zwierzęta przybierają na masie
-            //istnieje pewna, niewielka szansa, że zwierzęta się rozmnożą jeżeli posiada więcej niż jedno
-            //ponosisz koszty ochrony roślin przed szkodnikami
-            //jeżeli masz kury/krowy/owce dostajesz pieniądze za jajka albo mleko
+            crops.forEach(Crop::grow);
+            animals.forEach(Animal::increaseWeight);
+
+            animals.stream()
+                .map(Animal::getType)
+                .distinct().forEach(type -> {
+                    int count = (int) animals.stream().filter(animal -> animal.getType() == type).count();
+                    int pairs = (int) Math.floor(count / 2f);
+                    for(int i = 0; i<pairs; i++){
+                        if(random.nextFloat() < 0.001f){
+                            Animal animal = new Animal(week, type);
+                            animals.add(animal);
+                            System.out.println("Twoje zwierzeta sie rozmnożyły, oto nowe zwierze w Twojej farmie: " + animal.toString(week));
+                        }
+                    }
+            });
+
+            int weeklyEarnings = animals.stream().mapToInt(Animal::getWeeklyEarnings).sum();
+            if(weeklyEarnings > 0){
+                System.out.println("Za sprzedaż produktów odzwierzęcych otrzymujesz: " + weeklyEarnings);
+                this.money += weeklyEarnings;
+            }
+
+            int pestsProtectionCost = crops.stream().mapToInt(Crop::getPestsProtection).sum();
+            if(pestsProtectionCost > 0 ){
+                System.out.println("Płacisz " + pestsProtectionCost + " za ochrone roslin przed pasozytami!");
+                this.money -= pestsProtectionCost;
+            }
+
             //zwierzęta wcinają paszę, jeśli masz dla nich odłożone plony to w pierwszej kolejności ze stodoły, jeżeli nie to musisz je kupić.
 
-            //Jeżeli skończą się pieniądze:
-            //zwierzęta zaczynają chudnąć
-            //w każdym tygodniu istnieje niewielkie ryzyko, że robaki zjedzą plony na polach
+            if(money < 0){
+                //Jeżeli skończą się pieniądze:
+                //zwierzęta zaczynają chudnąć
+                //w każdym tygodniu istnieje niewielkie ryzyko, że robaki zjedzą plony na polach
+            }
 
             this.currentDate.add(Calendar.WEEK_OF_YEAR, 1);
+            this.week += 1;
         }
 
     }
