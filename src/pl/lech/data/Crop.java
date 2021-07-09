@@ -24,7 +24,7 @@ public class Crop extends TimedEntity {
     }
 
     public int getPerformance() {
-        return type.getPerformance();
+        return type.getPerformanceTperHa();
     }
 
     public int[] getWhenCanBePlanted() {
@@ -41,5 +41,10 @@ public class Crop extends TimedEntity {
 
     public void grow() {
         this.tick();
+    }
+
+
+    public String toString(int week) {
+        return type.getName() + " od posiania: " + (week - this.createWeek) + " tygodni, zbiory za: " + (this.createWeek + this.type.getWeeksToFinish() - week) + " tygodni";
     }
 }

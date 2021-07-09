@@ -15,9 +15,6 @@ public class FarmGame {
     private boolean endGame = false;
     private final Calendar currentDate = new GregorianCalendar();
     private final List<Farm> farms = new ArrayList<>();
-    private final List<ArableLand> arableLands = new ArrayList<>();
-    private final List<Animal> animals = new ArrayList<>();
-    private final List<Crop> crops = new ArrayList<>();
 
     private final List<Farm> availableFarms = new ArrayList<>();
 
@@ -73,27 +70,49 @@ public class FarmGame {
                 System.out.println("Niepoprawny wybór!");
                 continue;
             }
-            switch (MenuEntries.values()[choice-1]) {
+            switch (MenuEntries.values()[choice - 1]) {
                 case BuyFarm:
+                    //todo: implement
                     continue;
                 case ShowCrops:
+                    for (Farm farm : farms) {
+                        System.out.println("Farma o nazwie: " + farm.getName());
+                        for (ArableLand arableLand : farm.getArableLands()) {
+                            arableLand.getCrop().ifPresent(crop -> {
+                                System.out.println(" - " + crop.toString(week));
+                            });
+                        }
+                    }
                     continue;
                 case PlantCrops:
+                    //todo: implement
                     continue;
                 case ShowStocks:
+                    //todo: implement
                     continue;
                 case BuyBuilding:
+                    //todo: implement
                     continue;
                 case ShowAnimals:
+                    for (Farm farm : farms) {
+                        System.out.println("Farma o nazwie: " + farm.getName());
+                        for (Animal animal : farm.getAnimals()) {
+                            System.out.println(" - " + animal.toString(week));
+                        }
+                    }
                     continue;
                 case HarvestCrops:
+                    //todo: implement
                     //sprzedajemy albo przechowujemy (to sprawdza stodole)
                     continue;
                 case BuyAnimalCrop:
+                    //todo: implement
                     continue;
                 case SellAnimalCrop:
+                    //todo: implement
                     continue;
                 case ArableLandMenu:
+                    //todo: implement
                     continue;
                 case NextRound:
                     System.out.println("Przechodzenie do nastepnego tygodnia gry...");
@@ -106,38 +125,51 @@ public class FarmGame {
                     System.out.println("Niepoprawny wybór!");
                     continue;
             }
-            crops.forEach(Crop::grow);
-            animals.forEach(Animal::increaseWeight);
 
-            animals.stream()
-                .map(Animal::getType)
-                .distinct().forEach(type -> {
-                    int count = (int) animals.stream().filter(animal -> animal.getType() == type).count();
+            for (Farm farm : farms) {
+                farm.getArableLands().stream()
+                        .map(ArableLand::getCrop)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .forEach(Crop::grow);
+                farm.getAnimals().forEach(Animal::increaseWeight);
+
+                farm.getAnimals().stream()
+                        .map(Animal::getType)
+                        .distinct().forEach(type -> {
+                    int count = (int) farm.getAnimals().stream().filter(animal -> animal.getType() == type).count();
                     int pairs = (int) Math.floor(count / 2f);
-                    for(int i = 0; i<pairs; i++){
-                        if(random.nextFloat() < 0.001f){
+                    for (int i = 0; i < pairs; i++) {
+                        if (random.nextFloat() < 0.001f) {
                             Animal animal = new Animal(week, type);
-                            animals.add(animal);
+                            farm.getAnimals().add(animal);
                             System.out.println("Twoje zwierzeta sie rozmnożyły, oto nowe zwierze w Twojej farmie: " + animal.toString(week));
                         }
                     }
-            });
+                });
 
-            int weeklyEarnings = animals.stream().mapToInt(Animal::getWeeklyEarnings).sum();
-            if(weeklyEarnings > 0){
-                System.out.println("Za sprzedaż produktów odzwierzęcych otrzymujesz: " + weeklyEarnings);
-                this.money += weeklyEarnings;
+                int weeklyEarnings = farm.getAnimals().stream().mapToInt(Animal::getWeeklyEarnings).sum();
+                if (weeklyEarnings > 0) {
+                    System.out.println("Za sprzedaż produktów odzwierzęcych otrzymujesz: " + weeklyEarnings);
+                    this.money += weeklyEarnings;
+                }
+
+                int pestsProtectionCost = farm.getArableLands().stream()
+                        .map(ArableLand::getCrop)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get).mapToInt(Crop::getPestsProtection).sum();
+                if (pestsProtectionCost > 0) {
+                    System.out.println("Płacisz " + pestsProtectionCost + " za ochrone roslin przed pasozytami!");
+                    this.money -= pestsProtectionCost;
+                }
             }
 
-            int pestsProtectionCost = crops.stream().mapToInt(Crop::getPestsProtection).sum();
-            if(pestsProtectionCost > 0 ){
-                System.out.println("Płacisz " + pestsProtectionCost + " za ochrone roslin przed pasozytami!");
-                this.money -= pestsProtectionCost;
-            }
 
+            //todo: implement
             //zwierzęta wcinają paszę, jeśli masz dla nich odłożone plony to w pierwszej kolejności ze stodoły, jeżeli nie to musisz je kupić.
 
-            if(money < 0){
+            if (money < 0) {
+                //todo: implement
                 //Jeżeli skończą się pieniądze:
                 //zwierzęta zaczynają chudnąć
                 //w każdym tygodniu istnieje niewielkie ryzyko, że robaki zjedzą plony na polach
