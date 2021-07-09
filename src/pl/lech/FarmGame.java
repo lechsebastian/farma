@@ -5,6 +5,7 @@ import pl.lech.data.ArableLand;
 import pl.lech.data.Crop;
 import pl.lech.data.Farm;
 
+import java.io.Console;
 import java.util.*;
 
 public class FarmGame {
@@ -17,6 +18,24 @@ public class FarmGame {
     private final List<Farm> farms = new ArrayList<>();
 
     private final List<Farm> availableFarms = new ArrayList<>();
+    private static final Random RANDOM = new Random(System.currentTimeMillis());
+
+    private final String[] prefixName = new String[]{
+            "Bajeczna",
+            "Fantastyczna",
+            "Wyjątkowa",
+            "Unikalna",
+            "Superowa",
+            "Cukierkowa",
+    };
+
+    private final String[] sufixName = new String[]{
+            "Farma",
+            "Zagroda",
+            "Prowincja",
+            "Miejscówa",
+            "Zagródka",
+    };
 
     private enum MenuEntries {
         BuyFarm("Kup farme"),
@@ -52,15 +71,15 @@ public class FarmGame {
 
     private void generateAvailableFarms() {
         for (int i = 0; i < START_FARMS; i++) {
-            //availableFarms.add()
+            availableFarms.add(new Farm(prefixName[RANDOM.nextInt(prefixName.length)] + " " + sufixName[RANDOM.nextInt(sufixName.length)]));
         }
     }
 
     private void startGame() {
         Scanner scanner = new Scanner(System.in);
-        Random random = new Random(System.currentTimeMillis());
         while (!this.endGame) {
             System.out.println("Data: rok: " + this.currentDate.get(Calendar.YEAR) + ", tydzień: " + this.currentDate.get(Calendar.WEEK_OF_YEAR));
+            System.out.println("Stan konta: " + money + " ilość farm: " + farms.size());
             for (int i = 0; i < MenuEntries.values().length; i++) {
                 System.out.println((i + 1) + ". " + MenuEntries.values()[i].getTitle());
             }
@@ -72,7 +91,23 @@ public class FarmGame {
             }
             switch (MenuEntries.values()[choice - 1]) {
                 case BuyFarm:
-                    //todo: implement
+                    System.out.println();
+                    System.out.println();
+                    int i = 1;
+                    for (Farm availableFarm : availableFarms) {
+                        System.out.println(i + ". " + availableFarm.toString() + " Price: " + availableFarm.getBuyPrice());
+                        i++;
+                    }
+                    int farmChoice = scanner.nextInt() - 1;
+                    if(availableFarms.get(farmChoice).getBuyPrice() > money){
+                        System.out.println("Nie posiadasz wystarczającej ilości pieniędzy... :(");
+                        continue;
+                    }
+                    Farm remove = availableFarms.remove(farmChoice);
+                    System.out.println();
+                    System.out.println("Zakupiłeś farmę: " + remove.toString());
+                    money -= remove.getBuyPrice();
+                    farms.add(remove);
                     continue;
                 case ShowCrops:
                     for (Farm farm : farms) {
@@ -140,7 +175,7 @@ public class FarmGame {
                     int count = (int) farm.getAnimals().stream().filter(animal -> animal.getType() == type).count();
                     int pairs = (int) Math.floor(count / 2f);
                     for (int i = 0; i < pairs; i++) {
-                        if (random.nextFloat() < 0.001f) {
+                        if (RANDOM.nextFloat() < 0.001f) {
                             Animal animal = new Animal(week, type);
                             farm.getAnimals().add(animal);
                             System.out.println("Twoje zwierzeta sie rozmnożyły, oto nowe zwierze w Twojej farmie: " + animal.toString(week));
@@ -177,6 +212,7 @@ public class FarmGame {
 
             this.currentDate.add(Calendar.WEEK_OF_YEAR, 1);
             this.week += 1;
+            for(int i = 0; i<5; i++) System.out.println();
         }
 
     }
