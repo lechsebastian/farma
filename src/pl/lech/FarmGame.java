@@ -3,8 +3,9 @@ package pl.lech;
 import pl.lech.data.*;
 import pl.lech.data.buildings.Barn;
 
-import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class FarmGame {
     private static final int START_FARMS = 5;
@@ -40,7 +41,7 @@ public class FarmGame {
         BuyFarm("Kup farme"),
         ArableLandMenu("Kup/sprzedaj ziemie uprawna"),
         BuyBuilding("Kup nowy budynek"),
-        BuyAnimalCrop("Kup zwierzeta/rosliny"),
+        BuyAnimal("Kup zwierzeta"),
         PlantCrops("Posadz rosliny"),
         HarvestCrops("Zbierz plony"),
         SellAnimalCrop("Sprzedaj zwierzeta/rosliny"),
@@ -120,15 +121,55 @@ public class FarmGame {
                     }
                     continue;
                 }
-                case PlantCrops:
-                    //todo: implement
+                case PlantCrops: {
+                    Farm farm = selectFarm();
+                    if (farm == null) {
+                        continue;
+                    }
+                    ArableLand arableLand = selectArableLand(farm.getArableLands(), l -> "");
+                    if (arableLand == null) {
+                        continue;
+                    }
+                    CropType type = selectCropType();
+                    if (type == null) {
+                        continue;
+                    }
+                    if (money < arableLand.getHa() * type.getPreparationCost()) {
+                        System.out.println("Nie posiadasz pieniedzy na przygotowanie upraw...");
+                        continue;
+                    }
+                    arableLand.setCrop(new Crop(week, type));
+                    money -= arableLand.getHa() * type.getPreparationCost();
                     break;
-                case ShowStocks:
-                    //todo: implement
+                }
+                case ShowStocks: {
+                    for (Farm farm : farms) {
+                        for (Building building : farm.getBuildings()) {
+                            if (building instanceof Barn) {
+                                ((Barn) building).getStorage().forEach((item, amount) -> System.out.println(amount + "x " + item.getName()));
+                            }
+                        }
+                    }
                     continue;
-                case BuyBuilding:
-                    //todo: implement
+                }
+                case BuyBuilding: {
+                    Farm farm = selectFarm();
+                    if(farm == null){
+                        continue;
+                    }
+
+                    Building.Type type = selectBuildingType();
+                    if(type == null){
+                        continue;
+                    }
+                    if(money < type.getPrice()){
+                        System.out.println("Nie posiadasz wystarczajacej ilosci pieniedzy!");
+                        continue;
+                    }
+                    money -= type.getPrice();
+                    farm.getBuildings().add(type.createNew());
                     break;
+                }
                 case ShowAnimals: {
                     for (Farm farm : farms) {
                         System.out.println("Farma o nazwie: " + farm.getName());
@@ -142,9 +183,26 @@ public class FarmGame {
                     //todo: implement
                     //sprzedajemy albo przechowujemy (to sprawdza stodole)
                     break;
-                case BuyAnimalCrop:
-                    //todo: implement
+                case BuyAnimal: {
+                    AnimalType type = selectAnimal();
+                    if (type == null) {
+                        continue;
+                    }
+                    if (money < type.getPrice()) {
+                        System.out.println("Nie posiadasz wystarczajacej ilosci pieniedzy!");
+                        continue;
+                    }
+                    if (type.getRequiredBuilding() != null && !farms.stream().flatMap(farm -> farm.getBuildings().stream()).anyMatch(building -> building.getType() == type.getRequiredBuilding())) {
+                        System.out.println("Nie posiadasz wymaganego budynku!");
+                        continue;
+                    }
+                    farms.stream().filter(farm -> farm.getBuildings().stream().anyMatch(building -> building.getType() == type.getRequiredBuilding()))
+                            .findFirst().ifPresent(farm -> {
+                        farm.getAnimals().add(new Animal(week, type));
+                        money -= type.getPrice();
+                    });
                     break;
+                }
                 case SellAnimalCrop:
                     //todo: implement
                     break;
@@ -156,7 +214,7 @@ public class FarmGame {
                     char input = (char) scanner.next().charAt(0);
                     if (input == 'k') {
                         System.out.println("Wybierz dzialke na sprzedaz:");
-                        ArableLand land = selectArableLand(farm.getAvailableLands(), false);
+                        ArableLand land = selectArableLand(farm.getAvailableLands(), l -> "cena " + l.getSellPrice());
                         if (land == null)
                             continue;
                         farm.getAvailableLands().remove(land);
@@ -165,7 +223,7 @@ public class FarmGame {
                         System.out.println("Sprzedales dzialke o powierzchni " + land.getHa() + "ha za kwote " + land.getBuyPrice());
                     } else if (input == 's') {
                         System.out.println("Wybierz dzialke na sprzedaz:");
-                        ArableLand land = selectArableLand(farm.getArableLands(), true);
+                        ArableLand land = selectArableLand(farm.getArableLands(), l -> "cena " + l.getBuyPrice());
                         if (land == null)
                             continue;
                         farm.getAvailableLands().add(land);
@@ -242,20 +300,20 @@ public class FarmGame {
             this.week += 1;
             for (int i = 0; i < 5; i++) System.out.println();
 
-            if(
+            if (
                     farms.stream().flatMap(farm -> farm.getArableLands().stream()).mapToInt(ArableLand::getHa).sum() > 20 &&
                             farms.stream().flatMap(farm -> farm.getAnimals().stream()).map(Animal::getType).distinct().count() >= 5 &&
                             farms.stream().flatMap(farm -> farm.getArableLands().stream()).map(ArableLand::getCrop)
                                     .filter(Optional::isPresent).map(Optional::get).distinct().count() >= 5
-            ){
+            ) {
                 boolean ok = true;
                 for (AnimalType value : AnimalType.values()) {
-                    if(getFoodCount(value.getFoodType()) < farms.stream().flatMap(farm -> farm.getAnimals().stream()).filter(animal -> animal.getType() == value)
-                            .mapToInt(animal -> animal.getFoodPerWeek() * 52).sum()){
+                    if (getFoodCount(value.getFoodType()) < farms.stream().flatMap(farm -> farm.getAnimals().stream()).filter(animal -> animal.getType() == value)
+                            .mapToInt(animal -> animal.getFoodPerWeek() * 52).sum()) {
                         ok = false;
                     }
                 }
-                if(ok){
+                if (ok) {
                     System.out.println("**********************************************");
                     System.out.println("* Brawo, osiagnales status rolnika doskonalego");
                     System.out.println("* Udalo Ci sie to osiagnac w " + week + " tygodni");
@@ -267,18 +325,68 @@ public class FarmGame {
 
     }
 
+    private Building.Type selectBuildingType() {
+        int i;
+        do {
+            System.out.println("0. Cofnij");
+            i = 1;
+            for (Building.Type type : Building.Type.values()) {
+                System.out.println(i + ". " + type.toString());
+                i++;
+            }
+            i = scanner.nextInt() - 1;
+        } while (i < -1 || i >= Building.Type.values().length);
+        if (i == -1) return null;
+        return Building.Type.values()[i];
+    }
+
+    private AnimalType selectAnimal() {
+        int i;
+        do {
+            System.out.println("0. Cofnij");
+            i = 1;
+            for (AnimalType type : AnimalType.values()) {
+                System.out.println(i + ". " + type.toString());
+                i++;
+            }
+            i = scanner.nextInt() - 1;
+        } while (i < -1 || i >= AnimalType.values().length);
+        if (i == -1) return null;
+        return AnimalType.values()[i];
+    }
+
+    private CropType selectCropType() {
+        int i;
+        List<CropType> collect = Arrays.stream(CropType.values()).filter(type -> Arrays.stream(type.getWhenCanBePlanted()).anyMatch(z -> z == week % 52)).collect(Collectors.toList());
+        if (collect.size() == 0) {
+            System.out.println("Nie mozna teraz siac zadnej z roslin...");
+            return null;
+        }
+        do {
+            System.out.println("0. Cofnij");
+            i = 1;
+            for (CropType type : collect) {
+                System.out.println(i + ". " + type.toString());
+                i++;
+            }
+            i = scanner.nextInt() - 1;
+        } while (i < -1 || i >= collect.size());
+        if (i == -1) return null;
+        return collect.get(i);
+    }
+
     private int getFoodCount(Item foodType) {
         return farms.stream().flatMap(farm -> farm.getBuildings().stream())
                 .filter(building -> building instanceof Barn).mapToInt(barn -> ((Barn) barn).getItem(foodType)).sum();
     }
 
-    private ArableLand selectArableLand(List<ArableLand> arableLands, boolean sell) {
+    private ArableLand selectArableLand(List<ArableLand> arableLands, Function<ArableLand, String> sufix) {
         int i;
         do {
             System.out.println("0. Cofnij");
             i = 1;
             for (ArableLand land : arableLands) {
-                System.out.println(i + ". " + land.toString(week) + (sell ? (" cena: " + land.getSellPrice()) : (" cena: " + land.getBuyPrice())));
+                System.out.println(i + ". " + land.toString(week) + " " + sufix.apply(land));
                 i++;
             }
             i = scanner.nextInt() - 1;

@@ -8,10 +8,21 @@ import java.util.Map;
 
 public class Barn extends Building {
     private final Map<Item, Integer> storage = new HashMap<>();
+
     public int getItem(Item item) {
         return storage.getOrDefault(item, 0);
     }
-    public void storeItem(Item item, int amount){
+
+    public void storeItem(Item item, int amount) {
         storage.put(item, amount + getItem(item));
+    }
+
+    public Map<Item, Integer> getStorage() {
+        return storage;
+    }
+
+    @Override
+    public Type getType() {
+        return Type.Barn;
     }
 }

@@ -1,11 +1,12 @@
 package pl.lech.data;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 
 public class ArableLand {
     private final int width;
     private final int length;
-    private final Optional<Crop> crop = Optional.empty();
+    private Crop crop = null;
 
     public ArableLand(int width, int length) {
         this.width = width;
@@ -25,11 +26,11 @@ public class ArableLand {
     }
 
     public Optional<Crop> getCrop() {
-        return crop;
+        return Optional.ofNullable(crop);
     }
 
     public String toString(int week) {
-        return "Pole uprawne o wymiarach " + this.width + "m na " + this.length + "m (" + getHa() + "ha) -> " + crop.map(c -> c.toString(week)).orElse("brak roślin");
+        return "Pole uprawne o wymiarach " + this.width + "m na " + this.length + "m (" + getHa() + "ha) -> " + getCrop().map(c -> c.toString(week)).orElse("brak roślin");
     }
 
     public int getSellPrice() {
@@ -38,5 +39,9 @@ public class ArableLand {
 
     public int getBuyPrice() {
         return getHa() * 12300;
+    }
+
+    public void setCrop(Crop crop) {
+        this.crop = crop;
     }
 }
