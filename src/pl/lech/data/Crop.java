@@ -15,6 +15,10 @@ public class Crop extends TimedEntity {
         return type.getWeeksToFinish();
     }
 
+    public boolean isReady(int week){
+        return week >= createWeek + getWeeksToFinish();
+    }
+
     public int getPreparationCost() {
         return type.getPreparationCost();
     }

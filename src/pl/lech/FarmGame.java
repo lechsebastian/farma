@@ -189,6 +189,10 @@ public class FarmGame {
                         continue;
                     }
                     Crop crop = arableLand.getCrop().get();
+                    if(!crop.isReady(week)){
+                        System.out.println("Uprawy nie sa gotowe!");
+                        continue;
+                    }
                     Optional<Building> first = farm.getBuildings().stream().filter(building -> building.getType() == Building.Type.Barn).findFirst();
                     boolean sell = !first.isPresent();
                     if(first.isPresent()){
@@ -238,6 +242,10 @@ public class FarmGame {
                     if(input == 'z'){
                         Animal animal = selectItem(farm.getAnimals(), a -> a.toString(week));
                         if(animal == null){
+                            continue;
+                        }
+                        if(!animal.isReady()){
+                            System.out.println("Zwierze jeszcze nie jest gotowe na sprzedaz!");
                             continue;
                         }
                         int sellPrice = animal.getSellPrice();
@@ -310,7 +318,6 @@ public class FarmGame {
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .forEach(Crop::grow);
-                farm.getAnimals().forEach(Animal::increaseWeight);
 
                 farm.getAnimals().stream()
                         .map(Animal::getType)
@@ -371,7 +378,10 @@ public class FarmGame {
                             animal.noMeal();
                         }else{
                             money -= cost;
+                            animal.increaseWeight();
                         }
+                    }else{
+                        animal.increaseWeight();
                     }
                 }
             }

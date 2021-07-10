@@ -11,7 +11,7 @@ public class TimedEntity {
         this.weeksToFinish--;
     }
 
-    protected boolean isReady(){
+    public boolean isReady(){
         return weeksToFinish <= 0;
     }
 }

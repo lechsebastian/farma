@@ -3,11 +3,13 @@ package pl.lech.data;
 public class Animal extends TimedEntity {
     private int createWeek;
     private final AnimalType type;
+    private int weight;
 
     public Animal(int currentWeek, AnimalType type) {
         super(type.getMaturationWeeks());
         this.createWeek = currentWeek;
         this.type = type;
+        this.weight = type.getWeightMin();
     }
 
     public AnimalType getType() {
@@ -37,8 +39,10 @@ public class Animal extends TimedEntity {
 
     public void increaseWeight() {
         if(!isReady()){
-            //increase weight and store in variable
             this.tick();
+        }
+        if(weight < type.getWeightMax()){
+            this.weight = Math.min(type.getWeightMax(), weight + type.getWeightDiff());
         }
     }
 
@@ -51,11 +55,12 @@ public class Animal extends TimedEntity {
     }
 
     public void noMeal() {
-        //todo: implement
+        if(weight < type.getWeightMax()){
+            this.weight = Math.max(type.getWeightMin(), weight - type.getWeightDiff());
+        }
     }
 
     public int getSellPrice() {
-        //todo: implement
-        return 0;
+        return (int) (type.getPrice() * (1f + (weight - type.getWeightMin())) / (type.getWeightMax() - type.getWeightMin()));
     }
 }

@@ -3,10 +3,10 @@ package pl.lech.data;
 import pl.lech.data.buildings.Barn;
 
 public enum AnimalType {
-    Cow("krowa", 40, 100, CropType.Grass, 18, 1000, Building.Type.Barn),
-    Sheep("owca", 30, 50, CropType.Grass, 12, 800,  Building.Type.Barn),
-    Goat("koza", 20, 70, CropType.Grass, 12, 900,  Building.Type.Barn),
-    Chihuahua("Chihuahua", 10, 0, FoodType.DogFood, 7, 4000, null),
+    Cow("krowa", 40, 100, CropType.Grass, 18, 1000, Building.Type.Barn, 10, 50, 4),
+    Sheep("owca", 30, 50, CropType.Grass, 12, 800,  Building.Type.Barn, 5, 30, 2),
+    Goat("koza", 20, 70, CropType.Grass, 12, 900,  Building.Type.Barn, 10, 40, 3),
+    Chihuahua("Chihuahua", 10, 0, FoodType.DogFood, 7, 4000, null, 1, 5, 1),
     ;
 
     private final String name;
@@ -16,8 +16,11 @@ public enum AnimalType {
     private int foodPerWeek;
     private int price;
     private Building.Type requiredBuilding;
+    private int weightMin;
+    private int weightMax;
+    private int weightDiff;
 
-    AnimalType(String name, int maturationTime, int weeklyEarnings, Item foodType, int foodPerWeek, int price, Building.Type requiredBuilding) {
+    AnimalType(String name, int maturationTime, int weeklyEarnings, Item foodType, int foodPerWeek, int price, Building.Type requiredBuilding, int weightMin, int weightMax, int weightDiff) {
         this.name = name;
         this.maturationWeeks = maturationTime;
         this.weeklyEarnings = weeklyEarnings;
@@ -25,6 +28,9 @@ public enum AnimalType {
         this.foodPerWeek = foodPerWeek;
         this.price = price;
         this.requiredBuilding = requiredBuilding;
+        this.weightMin = weightMin;
+        this.weightMax = weightMax;
+        this.weightDiff = weightDiff;
     }
 
     public String getName() {
@@ -53,6 +59,18 @@ public enum AnimalType {
 
     public Building.Type getRequiredBuilding() {
         return requiredBuilding;
+    }
+
+    public int getWeightDiff() {
+        return weightDiff;
+    }
+
+    public int getWeightMax() {
+        return weightMax;
+    }
+
+    public int getWeightMin() {
+        return weightMin;
     }
 
     @Override
