@@ -1,12 +1,11 @@
 package pl.lech.data;
 
-import java.util.Arrays;
-
 public enum CropType implements Item {
-    Wheat("Pszenica", 12, 1000, 500, 5, new int []{13,14,15,16}, 1000, 10000),
-    Grass("Trawa", 4, 400, 100, 3, new int []{13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36}, 200, 2000),
-    Carrot("Marchew", 8, 500, 200, 1, new int []{10,11,12,13}, 100, 1000),
-    Beetroot("Buraki", 7, 600, 300, 1, new int []{10,11,12,13}, 100, 1200),
+    Wheat("Pszenica", 12, 1000, 500, 5, new int[]{13, 14, 15, 16}, 1000, 10000),
+    Grass("Trawa", 4, 400, 100, 3, new int[]{13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36}, 200, 2000),
+    Carrot("Marchew", 8, 500, 200, 1, new int[]{10, 11, 12, 13}, 100, 1000),
+    Beetroot("Buraki", 7, 600, 300, 1, new int[]{10, 11, 12, 13}, 100, 1200),
+    Peas("Groszek", 6, 300, 100, 2, new int[]{10, 11, 12, 13}, 200, 1200),
     ;
     private final String name;
     private final int weeksToFinish;

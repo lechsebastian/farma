@@ -7,6 +7,7 @@ public enum AnimalType {
     Sheep("owca", 30, 50, CropType.Grass, 12, 800,  Building.Type.Barn, 5, 30, 2),
     Goat("koza", 20, 70, CropType.Grass, 12, 900,  Building.Type.Barn, 10, 40, 3),
     Chihuahua("Chihuahua", 10, 0, FoodType.DogFood, 7, 4000, null, 1, 5, 1),
+    Buldog("Buldog", 13, 0, FoodType.DogFood, 7, 3000, null, 2, 15, 2),
     ;
 
     private final String name;
