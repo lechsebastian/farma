@@ -31,4 +31,12 @@ public class ArableLand {
     public String toString(int week) {
         return "Pole uprawne o wymiarach " + this.width + "m na " + this.length + "m (" + getHa() + "ha) -> " + crop.map(c -> c.toString(week)).orElse("brak roślin");
     }
+
+    public int getSellPrice() {
+        return getBuyPrice() * 8 / 10;
+    }
+
+    public int getBuyPrice() {
+        return getHa() * 1000;
+    }
 }

@@ -5,7 +5,7 @@ import pl.lech.data.ArableLand;
 import pl.lech.data.Crop;
 import pl.lech.data.Farm;
 
-import java.io.Console;
+import java.io.IOException;
 import java.util.*;
 
 public class FarmGame {
@@ -36,6 +36,7 @@ public class FarmGame {
             "Miejscówa",
             "Zagródka",
     };
+    private Scanner scanner;
 
     private enum MenuEntries {
         BuyFarm("Kup farme"),
@@ -76,7 +77,7 @@ public class FarmGame {
     }
 
     private void startGame() {
-        Scanner scanner = new Scanner(System.in);
+        scanner = new Scanner(System.in);
         while (!this.endGame) {
             System.out.println("Data: rok: " + this.currentDate.get(Calendar.YEAR) + ", tydzień: " + this.currentDate.get(Calendar.WEEK_OF_YEAR));
             System.out.println("Stan konta: " + money + " ilość farm: " + farms.size());
@@ -99,7 +100,7 @@ public class FarmGame {
                         i++;
                     }
                     int farmChoice = scanner.nextInt() - 1;
-                    if(availableFarms.get(farmChoice).getBuyPrice() > money){
+                    if (availableFarms.get(farmChoice).getBuyPrice() > money) {
                         System.out.println("Nie posiadasz wystarczającej ilości pieniędzy... :(");
                         continue;
                     }
@@ -108,7 +109,7 @@ public class FarmGame {
                     System.out.println("Zakupiłeś farmę: " + remove.toString());
                     money -= remove.getBuyPrice();
                     farms.add(remove);
-                    continue;
+                    break;
                 case ShowCrops:
                     for (Farm farm : farms) {
                         System.out.println("Farma o nazwie: " + farm.getName());
@@ -121,13 +122,13 @@ public class FarmGame {
                     continue;
                 case PlantCrops:
                     //todo: implement
-                    continue;
+                    break;
                 case ShowStocks:
                     //todo: implement
                     continue;
                 case BuyBuilding:
                     //todo: implement
-                    continue;
+                    break;
                 case ShowAnimals:
                     for (Farm farm : farms) {
                         System.out.println("Farma o nazwie: " + farm.getName());
@@ -139,16 +140,41 @@ public class FarmGame {
                 case HarvestCrops:
                     //todo: implement
                     //sprzedajemy albo przechowujemy (to sprawdza stodole)
-                    continue;
+                    break;
                 case BuyAnimalCrop:
                     //todo: implement
-                    continue;
+                    break;
                 case SellAnimalCrop:
                     //todo: implement
-                    continue;
+                    break;
                 case ArableLandMenu:
-                    //todo: implement
-                    continue;
+                    Farm farm = selectFarm();
+                    if (farm == null)
+                        continue;
+                    System.out.println("Chcesz kupic czy sprzedac dzialke? (k/s)");
+                    char input = (char) scanner.next().charAt(0);
+                    if (input == 'k') {
+                        System.out.println("Wybierz dzialke na sprzedaz:");
+                        ArableLand land = selectArableLand(farm.getAvailableLands(), false);
+                        if(land == null)
+                            continue;
+                        farm.getAvailableLands().remove(land);
+                        farm.getArableLands().add(land);
+                        money += land.getSellPrice();
+                        System.out.println("Sprzedales dzialke o powierzchni " + land.getHa() + "ha za kwote " + land.getBuyPrice());
+                    } else if (input == 's') {
+                        System.out.println("Wybierz dzialke na sprzedaz:");
+                        ArableLand land = selectArableLand(farm.getArableLands(), true);
+                        if(land == null)
+                            continue;
+                        farm.getAvailableLands().add(land);
+                        farm.getArableLands().remove(land);
+                        money += land.getSellPrice();
+                        System.out.println("Sprzedales dzialke o powierzchni " + land.getHa() + "ha za kwote " + land.getSellPrice());
+                    } else {
+                        continue;
+                    }
+                    break;
                 case NextRound:
                     System.out.println("Przechodzenie do nastepnego tygodnia gry...");
                     break;
@@ -212,9 +238,39 @@ public class FarmGame {
 
             this.currentDate.add(Calendar.WEEK_OF_YEAR, 1);
             this.week += 1;
-            for(int i = 0; i<5; i++) System.out.println();
+            for (int i = 0; i < 5; i++) System.out.println();
         }
 
+    }
+
+    private ArableLand selectArableLand(List<ArableLand> arableLands, boolean sell) {
+        int i;
+        do {
+            System.out.println("0. Cofnij");
+            i = 1;
+            for (ArableLand land : arableLands) {
+                System.out.println(i + ". " + land.toString(week) + (sell ? (" cena: " + land.getSellPrice()) : (" cena: " + land.getBuyPrice())));
+                i++;
+            }
+            i = scanner.nextInt() - 1;
+        } while (i < -1 || i >= farms.size());
+        if (i == -1) return null;
+        return arableLands.get(i);
+    }
+
+    private Farm selectFarm() {
+        int i;
+        do {
+            System.out.println("0. Cofnij");
+            i = 1;
+            for (Farm farm : farms) {
+                System.out.println(i + ". " + farm.toString());
+                i++;
+            }
+            i = scanner.nextInt() - 1;
+        } while (i < -1 || i >= farms.size());
+        if (i == -1) return null;
+        return farms.get(i);
     }
 
     public static void main(String[] args) {
