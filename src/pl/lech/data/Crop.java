@@ -47,4 +47,8 @@ public class Crop extends TimedEntity {
     public String toString(int week) {
         return type.getName() + " od posiania: " + (week - this.createWeek) + " tygodni, zbiory za: " + (this.createWeek + this.type.getWeeksToFinish() - week) + " tygodni";
     }
+
+    public CropType getType() {
+        return type;
+    }
 }

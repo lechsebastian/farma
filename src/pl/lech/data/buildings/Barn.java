@@ -25,4 +25,8 @@ public class Barn extends Building {
     public Type getType() {
         return Type.Barn;
     }
+
+    public void takeItem(Item foodType, int take) {
+        this.storage.put(foodType, getItem(foodType) - take);
+    }
 }

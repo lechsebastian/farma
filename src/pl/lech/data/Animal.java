@@ -45,4 +45,12 @@ public class Animal extends TimedEntity {
     public int getFoodPerWeek() {
         return type.getFoodPerWeek();
     }
+
+    public Item getFoodType() {
+        return type.getFoodType();
+    }
+
+    public void noMeal() {
+        //todo: implement
+    }
 }

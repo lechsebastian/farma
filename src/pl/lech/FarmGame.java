@@ -179,10 +179,35 @@ public class FarmGame {
                     }
                     continue;
                 }
-                case HarvestCrops:
-                    //todo: implement
-                    //sprzedajemy albo przechowujemy (to sprawdza stodole)
+                case HarvestCrops:{
+                    Farm farm = selectFarm();
+                    if(farm == null){
+                        continue;
+                    }
+                    ArableLand arableLand = selectArableLand(farm.getArableLands().stream().filter(l -> l.getCrop().isPresent()).collect(Collectors.toList()), l -> "");
+                    if(arableLand == null){
+                        continue;
+                    }
+                    Crop crop = arableLand.getCrop().get();
+                    Optional<Building> first = farm.getBuildings().stream().filter(building -> building.getType() == Building.Type.Barn).findFirst();
+                    boolean sell = !first.isPresent();
+                    if(first.isPresent()){
+                        System.out.println("Wolisz plony sprzedac czy przechowac w stodole? p/s");
+                        char input = scanner.next().charAt(0);
+                        if(input == 'p'){
+                            System.out.println("Przechowales plony: " + crop.getType().getName() + " x" + (crop.getPerformance() * arableLand.getHa()));
+                            ((Barn)first.get()).storeItem(crop.getType(), crop.getPerformance() * arableLand.getHa());
+                        }else if(input == 's'){
+                            sell = true;
+                        }
+                    }
+                    if(sell){
+                        System.out.println("zebrales plony z: " + arableLand.toString(week));
+                        money -= crop.getCollectionCost() * arableLand.getHa();
+                        money += crop.getPerformance() * arableLand.getHa() * crop.getSellPrice();
+                    }
                     break;
+                }
                 case BuyAnimal: {
                     AnimalType type = selectAnimal();
                     if (type == null) {
@@ -281,19 +306,42 @@ public class FarmGame {
                         .map(Optional::get).mapToInt(Crop::getPestsProtection).sum();
                 if (pestsProtectionCost > 0) {
                     System.out.println("Płacisz " + pestsProtectionCost + " za ochrone roslin przed pasozytami!");
-                    this.money -= pestsProtectionCost;
+                    if(pestsProtectionCost > money){
+                        for (ArableLand arableLand : farm.getArableLands()) {
+                            if(arableLand.getCrop().isPresent()){
+                                if(RANDOM.nextFloat() < 0.01f){
+                                    System.out.println("Plony zostaly zjedzone przez robaki!!");
+                                    arableLand.setCrop(null);
+                                }
+                            }
+                        }
+                    }else{
+                        this.money -= pestsProtectionCost;
+                    }
                 }
             }
 
 
-            //todo: implement
-            //zwierzęta wcinają paszę, jeśli masz dla nich odłożone plony to w pierwszej kolejności ze stodoły, jeżeli nie to musisz je kupić.
-
-            if (money < 0) {
-                //todo: implement
-                //Jeżeli skończą się pieniądze:
-                //zwierzęta zaczynają chudnąć
-                //w każdym tygodniu istnieje niewielkie ryzyko, że robaki zjedzą plony na polach
+            List<Barn> barns = farms.stream().flatMap(farm -> farm.getBuildings().stream()).filter(b -> b.getType() == Building.Type.Barn).map(b -> (Barn)b).collect(Collectors.toList());
+            for (Farm farm : farms) {
+                for (Animal animal : farm.getAnimals()) {
+                    Item foodType = animal.getFoodType();
+                    int foodPerWeek = animal.getFoodPerWeek();
+                    for (Barn barn : barns) {
+                        int take = Math.min(barn.getItem(foodType), foodPerWeek);
+                        foodPerWeek -= take;
+                        barn.takeItem(foodType, take);
+                    }
+                    if(foodPerWeek > 0){
+                        System.out.println("Nie posiadasz " + foodType.getName() + " a wiec musisz kupic wydajac " + foodType.getBuyPrice() * foodPerWeek);
+                        int cost = foodType.getBuyPrice() * foodPerWeek;
+                        if(money < cost){
+                            animal.noMeal();
+                        }else{
+                            money -= cost;
+                        }
+                    }
+                }
             }
 
             this.currentDate.add(Calendar.WEEK_OF_YEAR, 1);

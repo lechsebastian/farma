@@ -17,7 +17,8 @@ public enum FoodType implements Item {
         return name;
     }
 
-    public int getPrice() {
+    @Override
+    public int getBuyPrice() {
         return price;
     }
 }

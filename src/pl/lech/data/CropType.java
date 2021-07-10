@@ -61,6 +61,11 @@ public enum CropType implements Item {
     }
 
     @Override
+    public int getBuyPrice() {
+        return getSellPrice() * 10 / 8;
+    }
+
+    @Override
     public String toString() {
         return name + " cena przygotowania: " + this.preparationCost + "/ha,  cena ochrony: " + pestsProtection + "/ha co tydzien";
     }
