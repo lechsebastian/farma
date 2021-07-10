@@ -41,4 +41,8 @@ public class Animal extends TimedEntity {
             this.tick();
         }
     }
+
+    public int getFoodPerWeek() {
+        return type.getFoodPerWeek();
+    }
 }

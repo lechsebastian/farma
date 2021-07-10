@@ -37,6 +37,6 @@ public class ArableLand {
     }
 
     public int getBuyPrice() {
-        return getHa() * 1000;
+        return getHa() * 12300;
     }
 }

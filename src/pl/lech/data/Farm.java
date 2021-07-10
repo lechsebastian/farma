@@ -17,7 +17,7 @@ public class Farm {
         this.name = name;
         int max = ThreadLocalRandom.current().nextInt(5, 10);
         for(int i = 0; i<max;i++){
-            availableArableLands.add(new ArableLand(ThreadLocalRandom.current().nextInt(100, 1000),ThreadLocalRandom.current().nextInt(100, 1000)));
+            availableArableLands.add(new ArableLand(ThreadLocalRandom.current().nextInt(100, 400),ThreadLocalRandom.current().nextInt(100, 400)));
         }
     }
 

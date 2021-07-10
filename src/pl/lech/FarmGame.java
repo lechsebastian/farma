@@ -1,9 +1,7 @@
 package pl.lech;
 
-import pl.lech.data.Animal;
-import pl.lech.data.ArableLand;
-import pl.lech.data.Crop;
-import pl.lech.data.Farm;
+import pl.lech.data.*;
+import pl.lech.data.buildings.Barn;
 
 import java.io.IOException;
 import java.util.*;
@@ -91,7 +89,7 @@ public class FarmGame {
                 continue;
             }
             switch (MenuEntries.values()[choice - 1]) {
-                case BuyFarm:
+                case BuyFarm: {
                     System.out.println();
                     System.out.println();
                     int i = 1;
@@ -110,7 +108,8 @@ public class FarmGame {
                     money -= remove.getBuyPrice();
                     farms.add(remove);
                     break;
-                case ShowCrops:
+                }
+                case ShowCrops: {
                     for (Farm farm : farms) {
                         System.out.println("Farma o nazwie: " + farm.getName());
                         for (ArableLand arableLand : farm.getArableLands()) {
@@ -120,6 +119,7 @@ public class FarmGame {
                         }
                     }
                     continue;
+                }
                 case PlantCrops:
                     //todo: implement
                     break;
@@ -129,7 +129,7 @@ public class FarmGame {
                 case BuyBuilding:
                     //todo: implement
                     break;
-                case ShowAnimals:
+                case ShowAnimals: {
                     for (Farm farm : farms) {
                         System.out.println("Farma o nazwie: " + farm.getName());
                         for (Animal animal : farm.getAnimals()) {
@@ -137,6 +137,7 @@ public class FarmGame {
                         }
                     }
                     continue;
+                }
                 case HarvestCrops:
                     //todo: implement
                     //sprzedajemy albo przechowujemy (to sprawdza stodole)
@@ -147,7 +148,7 @@ public class FarmGame {
                 case SellAnimalCrop:
                     //todo: implement
                     break;
-                case ArableLandMenu:
+                case ArableLandMenu: {
                     Farm farm = selectFarm();
                     if (farm == null)
                         continue;
@@ -156,7 +157,7 @@ public class FarmGame {
                     if (input == 'k') {
                         System.out.println("Wybierz dzialke na sprzedaz:");
                         ArableLand land = selectArableLand(farm.getAvailableLands(), false);
-                        if(land == null)
+                        if (land == null)
                             continue;
                         farm.getAvailableLands().remove(land);
                         farm.getArableLands().add(land);
@@ -165,7 +166,7 @@ public class FarmGame {
                     } else if (input == 's') {
                         System.out.println("Wybierz dzialke na sprzedaz:");
                         ArableLand land = selectArableLand(farm.getArableLands(), true);
-                        if(land == null)
+                        if (land == null)
                             continue;
                         farm.getAvailableLands().add(land);
                         farm.getArableLands().remove(land);
@@ -175,6 +176,7 @@ public class FarmGame {
                         continue;
                     }
                     break;
+                }
                 case NextRound:
                     System.out.println("Przechodzenie do nastepnego tygodnia gry...");
                     break;
@@ -239,8 +241,35 @@ public class FarmGame {
             this.currentDate.add(Calendar.WEEK_OF_YEAR, 1);
             this.week += 1;
             for (int i = 0; i < 5; i++) System.out.println();
+
+            if(
+                    farms.stream().flatMap(farm -> farm.getArableLands().stream()).mapToInt(ArableLand::getHa).sum() > 20 &&
+                            farms.stream().flatMap(farm -> farm.getAnimals().stream()).map(Animal::getType).distinct().count() >= 5 &&
+                            farms.stream().flatMap(farm -> farm.getArableLands().stream()).map(ArableLand::getCrop)
+                                    .filter(Optional::isPresent).map(Optional::get).distinct().count() >= 5
+            ){
+                boolean ok = true;
+                for (AnimalType value : AnimalType.values()) {
+                    if(getFoodCount(value.getFoodType()) < farms.stream().flatMap(farm -> farm.getAnimals().stream()).filter(animal -> animal.getType() == value)
+                            .mapToInt(animal -> animal.getFoodPerWeek() * 52).sum()){
+                        ok = false;
+                    }
+                }
+                if(ok){
+                    System.out.println("**********************************************");
+                    System.out.println("* Brawo, osiagnales status rolnika doskonalego");
+                    System.out.println("* Udalo Ci sie to osiagnac w " + week + " tygodni");
+                    System.out.println("**********************************************");
+                    endGame = true;
+                }
+            }
         }
 
+    }
+
+    private int getFoodCount(Item foodType) {
+        return farms.stream().flatMap(farm -> farm.getBuildings().stream())
+                .filter(building -> building instanceof Barn).mapToInt(barn -> ((Barn) barn).getItem(foodType)).sum();
     }
 
     private ArableLand selectArableLand(List<ArableLand> arableLands, boolean sell) {
