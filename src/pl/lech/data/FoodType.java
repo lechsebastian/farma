@@ -21,4 +21,9 @@ public enum FoodType implements Item {
     public int getBuyPrice() {
         return price;
     }
+
+    @Override
+    public int getSellPrice() {
+        return price * 8 / 10;
+    }
 }

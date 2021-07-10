@@ -53,4 +53,9 @@ public class Animal extends TimedEntity {
     public void noMeal() {
         //todo: implement
     }
+
+    public int getSellPrice() {
+        //todo: implement
+        return 0;
+    }
 }

@@ -29,4 +29,8 @@ public class Barn extends Building {
     public void takeItem(Item foodType, int take) {
         this.storage.put(foodType, getItem(foodType) - take);
     }
+
+    public int removeItem(Item o) {
+        return storage.remove(o);
+    }
 }

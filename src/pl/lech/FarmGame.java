@@ -228,9 +228,41 @@ public class FarmGame {
                     });
                     break;
                 }
-                case SellAnimalCrop:
-                    //todo: implement
+                case SellAnimalCrop: {
+                    Farm farm = selectFarm();
+                    if(farm == null){
+                        continue;
+                    }
+                    System.out.println("Chcesz sprzedac zwierze czy plony? (z/p)");
+                    char input = scanner.next().charAt(0);
+                    if(input == 'z'){
+                        Animal animal = selectItem(farm.getAnimals(), a -> a.toString(week));
+                        if(animal == null){
+                            continue;
+                        }
+                        int sellPrice = animal.getSellPrice();
+                        money += sellPrice;
+                        farm.getAnimals().remove(animal);
+                        System.out.println("Sprzedales " + animal.toString(week));
+                    }else if(input == 'p'){
+                        for (Building building : farm.getBuildings()) {
+                            if(building instanceof Barn){
+                                System.out.println("Znaleziono stodole z plonami, wybierz ktore chcesz sprzedac: ");
+                                Set<Item> items = ((Barn) building).getStorage().keySet();
+                                Item o = selectItem(new ArrayList<>(items), Object::toString);
+                                if(o == null){
+                                    continue;
+                                }
+                                int count = ((Barn) building).removeItem(o);
+                                money += o.getSellPrice() * count;
+                                System.out.println("sprzedano za " + (o.getSellPrice() * count));
+                            }
+                        }
+                    }else{
+                        continue;
+                    }
                     break;
+                }
                 case ArableLandMenu: {
                     Farm farm = selectFarm();
                     if (farm == null)
@@ -344,10 +376,6 @@ public class FarmGame {
                 }
             }
 
-            this.currentDate.add(Calendar.WEEK_OF_YEAR, 1);
-            this.week += 1;
-            for (int i = 0; i < 5; i++) System.out.println();
-
             if (
                     farms.stream().flatMap(farm -> farm.getArableLands().stream()).mapToInt(ArableLand::getHa).sum() > 20 &&
                             farms.stream().flatMap(farm -> farm.getAnimals().stream()).map(Animal::getType).distinct().count() >= 5 &&
@@ -369,8 +397,27 @@ public class FarmGame {
                     endGame = true;
                 }
             }
+
+            this.currentDate.add(Calendar.WEEK_OF_YEAR, 1);
+            this.week += 1;
+            for (int i = 0; i < 5; i++) System.out.println();
         }
 
+    }
+
+    private <T> T selectItem(List<T> keys, Function<T, String> toString) {
+        int i;
+        do {
+            System.out.println("0. Cofnij");
+            i = 1;
+            for (T type : keys) {
+                System.out.println(i + ". " + toString.apply(type));
+                i++;
+            }
+            i = scanner.nextInt() - 1;
+        } while (i < -1 || i >= keys.size());
+        if (i == -1) return null;
+        return keys.get(i);
     }
 
     private Building.Type selectBuildingType() {
