@@ -76,7 +76,7 @@ public enum AnimalType {
 
     @Override
     public String toString() {
-        return name + " Jedzenie: " + foodType.toString() + " x" + foodPerWeek + "/tydzien, Cena: " + getPrice() +
+        return name + " Jedzenie: " + foodType.getName() + " x" + foodPerWeek + "/tydzien, Cena: " + getPrice() +
                 (requiredBuilding != null ? (", Wymaga budynku: " + requiredBuilding.getName()) : "");
     }
 }

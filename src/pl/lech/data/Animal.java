@@ -4,6 +4,8 @@ public class Animal extends TimedEntity {
     private int createWeek;
     private final AnimalType type;
     private int weight;
+    private int deathCounter = 0;
+    private boolean alive = true;
 
     public Animal(int currentWeek, AnimalType type) {
         super(type.getMaturationWeeks());
@@ -38,6 +40,7 @@ public class Animal extends TimedEntity {
     }
 
     public void increaseWeight() {
+        deathCounter = 0;
         if(!isReady()){
             this.tick();
         }
@@ -55,12 +58,21 @@ public class Animal extends TimedEntity {
     }
 
     public void noMeal() {
-        if(weight < type.getWeightMax()){
+        if(weight > type.getWeightMin()){
             this.weight = Math.max(type.getWeightMin(), weight - type.getWeightDiff());
+        }else{
+            deathCounter++;
+            if(deathCounter == 3){
+                this.alive = false;
+            }
         }
     }
 
     public int getSellPrice() {
         return (int) (type.getPrice() * (1f + (weight - type.getWeightMin())) / (type.getWeightMax() - type.getWeightMin()));
+    }
+
+    public boolean isAlive() {
+        return alive;
     }
 }
