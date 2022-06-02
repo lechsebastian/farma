@@ -6,13 +6,13 @@
 * [Technologies](#technologies)
 * [Project status](#project-status)
 
-##General info
+## General info
 - This project is simple task to pass Java class and learn Java. 
 
-##Technologies
+## Technologies
 - Java / IntelliJ
 
-##Project status
+## Project status
 Project is compleate.
 
 ##Contact
